@@ -50,9 +50,13 @@ public class UrlService {
     }
 
     public String createShortUrl(final ShortUrlRequestDto shortUrlRequestDto) {
+        validateShortUrlRequestDto(shortUrlRequestDto);
+
         String shortUrl = getShortUrlFromCache(shortUrlRequestDto.getLongUrl());
         if (!shortUrl.isEmpty()) {
-            cacheHits++;
+            synchronized (this) {
+                cacheHits++;
+            }
             return this.baseUrl + shortUrl;
         }
 
@@ -94,7 +98,7 @@ public class UrlService {
     private String getShortUrlFromDatabase(final String longUrl) {
         final ShortUrl shortUrl = this.urlRepository.findByLongUrl(longUrl);
         if (!ObjectUtils.isEmpty(shortUrl)) {
-            return shortUrl.getShortUrl();
+            return shortUrl.getShortUrlId();
         }
 
         return "";
@@ -110,5 +114,19 @@ public class UrlService {
         }
 
         return shortUrlId.toString();
+    }
+
+    private void validateShortUrlRequestDto(final ShortUrlRequestDto shortUrlRequestDto) {
+        if (ObjectUtils.isEmpty(shortUrlRequestDto)) {
+            throw new BadRequestException("Request body cannot be empty");
+        }
+
+        if (shortUrlRequestDto.getLongUrl().isBlank()) {
+            throw new BadRequestException("Long url cannot be empty");
+        }
+
+        if (shortUrlRequestDto.getUserId().isBlank()) {
+            throw new BadRequestException("User Id cannot be empty");
+        }
     }
 }

@@ -34,7 +34,7 @@ public class UrlControllerTest {
     private UrlRepository urlRepository;
 
     @Test
-    public void testRedirectToLongUrl() throws Exception {
+    void testRedirectToLongUrl() throws Exception {
         given(urlService.getLongUrl(anyString())).willReturn("http://some.long.url/somePath");
 
         mvc.perform(get("/someShortUrlId"))
@@ -43,7 +43,7 @@ public class UrlControllerTest {
     }
 
     @Test
-    public void testCreateShortUrl() throws Exception {
+    void testCreateShortUrl() throws Exception {
         given(urlService.createShortUrl(new ShortUrlRequestDto())).willReturn("http://host/shortUrlId");
 
         mvc.perform(post("/short-url")
