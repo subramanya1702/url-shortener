@@ -33,9 +33,4 @@ public class UrlController {
     public String createShortUrl(@RequestBody ShortUrlRequestDto shortUrlRequestDto) {
         return this.urlService.createShortUrl(shortUrlRequestDto);
     }
-
-    @GetMapping("/stats")
-    public String getStatistics() {
-        return this.urlService.getStatistics();
-    }
 }

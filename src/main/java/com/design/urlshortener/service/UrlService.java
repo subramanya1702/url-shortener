@@ -6,6 +6,7 @@ import com.design.urlshortener.exception.BadRequestException;
 import com.design.urlshortener.generator.ShortUrlIdGenerator;
 import com.design.urlshortener.model.ShortUrl;
 import com.design.urlshortener.repository.UrlRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,6 @@ public class UrlService {
     private final UrlCache urlCache;
     private final ShortUrlIdGenerator shortUrlIdGenerator;
 
-    private long cacheHits = 0;
-    private long databaseHits = 0;
-
     @Value("${url.shortener.base.url}")
     private String baseUrl;
 
@@ -37,7 +35,7 @@ public class UrlService {
 
     public String getLongUrl(final String shortUrlId) {
         final String cachedUrl = this.urlCache.get(shortUrlId);
-        if (!cachedUrl.isEmpty()) {
+        if (StringUtils.isNotBlank(cachedUrl)) {
             return cachedUrl;
         }
 
@@ -53,10 +51,7 @@ public class UrlService {
         validateShortUrlRequestDto(shortUrlRequestDto);
 
         String shortUrl = getShortUrlFromCache(shortUrlRequestDto.getLongUrl());
-        if (!shortUrl.isEmpty()) {
-            synchronized (this) {
-                cacheHits++;
-            }
+        if (StringUtils.isNotBlank(shortUrl)) {
             return this.baseUrl + shortUrl;
         }
 
@@ -65,8 +60,7 @@ public class UrlService {
 
         synchronized (this) {
             final String shortUrlFromDatabase = this.getShortUrlFromDatabase(shortUrlRequestDto.getLongUrl());
-            if (!shortUrlFromDatabase.isEmpty()) {
-                databaseHits++;
+            if (StringUtils.isNotBlank(shortUrlFromDatabase)) {
                 return this.baseUrl + shortUrlFromDatabase;
             }
 
@@ -82,26 +76,16 @@ public class UrlService {
         return this.baseUrl + shortUrl;
     }
 
-    public String getStatistics() {
-        return "CacheHits: " + cacheHits + " | DatabaseHits: " + databaseHits;
-    }
-
     private String getShortUrlFromCache(final String longUrl) {
         final String cachedShortUrl = this.urlCache.getReverse(longUrl);
-        if (!cachedShortUrl.isEmpty()) {
-            return cachedShortUrl;
-        }
 
-        return "";
+        return StringUtils.isNotBlank(cachedShortUrl) ? cachedShortUrl : "";
     }
 
     private String getShortUrlFromDatabase(final String longUrl) {
         final ShortUrl shortUrl = this.urlRepository.findByLongUrl(longUrl);
-        if (!ObjectUtils.isEmpty(shortUrl)) {
-            return shortUrl.getShortUrlId();
-        }
 
-        return "";
+        return !ObjectUtils.isEmpty(shortUrl) ? shortUrl.getShortUrlId() : "";
     }
 
     private String generateShortUrl(long n) {
@@ -121,11 +105,11 @@ public class UrlService {
             throw new BadRequestException("Request body cannot be empty");
         }
 
-        if (shortUrlRequestDto.getLongUrl().isBlank()) {
+        if (StringUtils.isBlank(shortUrlRequestDto.getLongUrl())) {
             throw new BadRequestException("Long url cannot be empty");
         }
 
-        if (shortUrlRequestDto.getUserId().isBlank()) {
+        if (StringUtils.isBlank(shortUrlRequestDto.getUserId())) {
             throw new BadRequestException("User Id cannot be empty");
         }
     }
