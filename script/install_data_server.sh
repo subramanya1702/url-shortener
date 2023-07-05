@@ -18,7 +18,7 @@ yes | sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-p
 
 sudo docker run -dp 27017:27017 --name mongo mongo:latest
 sleep 10
-sudo docker exec mongo mongosh admin --eval 'db.createUser({user: "test", pwd: "1234", roles: [{role: "userAdminAnyDatabase", db: "admin"}]})'
+sudo docker exec mongo mongosh admin --eval 'db.createUser({user: "root", pwd: "1234", roles: [{role: "userAdminAnyDatabase", db: "admin"}]})'
 
 cd
 mkdir redis_config
