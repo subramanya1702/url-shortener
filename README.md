@@ -57,9 +57,9 @@ curl https://short.domain.com/abcxyz123
 ```
 #### Response
 ```sh
-HTTP/1.1 200 OK
+HTTP/1.1 301 Moved Permanently
 Date: Mon, 17 Jul 2023 18:17:00 IST
-Status: 200 OK
+Status: 301 Moved Permanently
 Content-Type: application/json
 Content-Length: 36
 
